@@ -6,7 +6,7 @@ import quandl as ql
 
 
 #api key for the quandl website
-ql.ApiConfig.api_key = "***************"
+ql.ApiConfig.api_key = "**************"
 
 
 #stocks I want to observe + start date of observation
