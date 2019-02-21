@@ -1,138 +1,212 @@
-#import of required moduels
 import pandas as pd
 from matplotlib import pyplot as plt
 import os
 import quandl as ql
 
 
-#api key for the quandl website
-ql.ApiConfig.api_key = "**************"
+def movingaverage():
+	#Import von benötigten Modulen
+	import pandas as pd
+	from matplotlib import pyplot as plt
+	import os
+	import quandl as ql
+	
+	os.system('clear')
+	print("Loading ...")
+	ql.ApiConfig.api_key = "**************"
+
+	#Aktien die ich betrachten möchte + Anfangsdatum
+	stocks = pd.read_csv("dowjonesstocks.csv", ";")
+	start = "2018-01-01"
+
+	#Variablen
+	i = 0
+
+	#Arrays
+	ma = []
+	price = []
+	price2 = []
+
+	while i <= len(stocks)-1:
+		#Lädt die Kursdaten in das Array "price"
+		price.insert(i, ql.get("EOD/"+stocks.Symbole.iloc[i]+".4", start_date = start))
+		i = i + 1
+
+	#Moving Average Array
+	i = 0
+
+	while i < len(price):
+		za = []
+		za2 = []
+		l = 0
+		j = 90
+		while j < len(price[i]):
+			summe = 0
+			mean = 0
+			k = j - 90
+			while k < j:
+				summe = summe + price[i].Close.iloc[k]
+				k = k + 1
+			mean = summe / 90
+			za.insert(l, mean)
+			za2.insert(l, price[i].Close.iloc[j])
+			l = l + 1
+			j = j + 1
+		ma.insert(i, za)
+		price2.insert(i, za2)
+		i = i + 1
 
 
-#stocks I want to observe + start date of observation
-stocks = pd.read_csv("dowjonesstocks.csv", ";")  #stock´s ticker are written in a csv file
-start = "2018-01-01"
+	#main program
+	while True:
+		os.system('clear')
+		print("*** MOVING AVERAGE ***")
+		print("0: Buy Signals")
+		print("1: Sell Signals")
+		print("2: Show Certain Stock + Moving Average")
+		print("3: Back to Main Menu")
+		print("")
+		try:
+			menu = int(input("-> "))
+		except:
+			print("Wrong Input ...")
+			continue
+		if menu == 0:
+			i = 0
+			while i < len(price2):
+				if price2[i][len(price2[i])-1] < ma[i][len(ma[i])-1] * 1.005 \
+				and price2[i][len(price2[i])-1] > ma[i][len(ma[i])-1] * 0.995 \
+				and price2[i][len(price2[i])-1]/price2[i][len(price2[i])-2] - 1 > 0:
+					plt.plot(price2[i])
+					plt.plot(ma[i])
+					plt.xlabel("Time")
+					plt.ylabel("Stock Price")
+					plt.legend(["Prices", "Moving Average"])
+					plt.title(stocks.Symbole.iloc[i])
+					plt.show()
+				i = i + 1
+		elif menu == 1:
+			i = 0
+			while i < len(price2):
+				if price2[i][len(price2[i])-1] < ma[i][len(ma[i])-1] * 1.005 \
+				and price2[i][len(price2[i])-1] > ma[i][len(ma[i])-1] * 0.995 \
+				and price2[i][len(price2[i])-1]/price2[i][len(price2[i])-2] - 1 < 0:
+					plt.plot(price2[i])
+					plt.plot(ma[i])
+					plt.xlabel("Time")
+					plt.ylabel("Stock Price")
+					plt.legend(["Prices", "Moving Average"])
+					plt.title(stocks.Symbole.iloc[i])
+					plt.show()
+				i = i + 1
+		elif menu == 2:
+			found = False
+			os.system('clear')
+			while found == False:
+				print("*** MOVING AVERAGE ***")
+				print("Insert Ticker of Stock You Want To See")
+				print()
+				ticker = str(input("-> "))
+				for i in range(len(stocks)):
+					stockname = str(stocks.Symbole.iloc[i])
+					if ticker.lower() == stockname.lower():
+						idx = i
+						found = True
+				if found == True:
+					plt.plot(price2[idx])
+					plt.plot(ma[idx])
+					plt.ylabel("Stock Price")
+					plt.legend(["Prices", "Moving Average"])
+					plt.title(stocks.Symbole.iloc[idx])
+					plt.show()
+				else:
+					print("Stock not found ...")
+		elif menu == 3:
+			break
+		else:
+			continue
+
+def cppi():
+	def stern():
+		print("*** CPPI ***")
+	import pandas as pd
+	from matplotlib import pyplot as plt
+	import os
+	import quandl as ql
+	
+	os.system('clear')
+	ql.ApiConfig.api_key = "DTfbBHVZR-CcbnyLGih1"
+
+	stern()
+	print("Stock Ticker")
+	print("")
+	ticker = input("-> ")
+	os.system('clear')
+	stern()
+	print("Start Date (Like yyyy-mm-dd)")
+	print("")
+	start = input("-> ")
+	os.system('clear')
+	print("Loading ...")
+	stock = ql.get("EOD/"+ticker+".4", start_date = start)
+
+	min = 100
+	i = 0
+	while i <= len(stock)-2:
+		if stock.Close.iloc[i+1]/stock.Close.iloc[i]-1 < min:
+			min = stock.Close.iloc[i+1]/stock.Close.iloc[i]-1
+		i = i + 1
+
+	os.system('clear')
+	stern()
+	print("Floor")
+	print("")
+	floor = input("-> ")
+	os.system('clear')
+	stern()
+	print("Current Value of the Portfolio")
+	print("")
+	value = input("-> ")
+	os.system('clear')
+	x = ( (float(floor) - float(value) * (1+min))/(-min) ) / float(value)
+	if x >= 0:
+		w = x
+	elif x < 0:
+		w = 0
+	w2 = round(1-w,4)
+	w = round(w,4)
+	stern()
+	print(f"{'% Risk Free Asset':<16}{':'}{w:>8}")
+	print(f"{'% Stock':<17}{':'}{w2:>8}")
+	print("")
+	print("")
+	print("")
+	menu = input("Press Enter")
 
 
-#variables
-i = 0
-
-#arrays
-ma = []
-price = []
-price2 = []
 
 
-while i <= len(stocks)-1:
-	#loads stock prices into the price array
-	price.insert(i, ql.get("EOD/"+stocks.Symbole.iloc[i]+".4", start_date = start))
-	i = i + 1
 
 
-#Moving Average Array
-
-i = 0
-
-while i < len(price):
-	za = []         #array for interim results
-	za2 = []        #array for interim results
-	l = 0
-	j = 90
-	while j < len(price[i]):
-		summe = 0
-		mean = 0
-		k = j - 90
-		while k < j:
-			summe = summe + price[i].Close.iloc[k]
-			k = k + 1
-		mean = summe / 90
-		za.insert(l, mean)      #90 day moving average for a certain stock for a certain day
-		za2.insert(l, price[i].Close.iloc[j])   #normal prices of the certain stock starting from the 90th observation
-		l = l + 1
-		j = j + 1
-	ma.insert(i, za)    #writes complete set of moving average data points into the array
-	price2.insert(i, za2) #complete set of a stock´s price data points starting form the 90th observation
-	i = i + 1
-
-
-#main program
-
+#Main Menu
 while True:
-	#main menu
-    os.system('clear')
-	print("*** MENU ***")
-	print("0: Buy Signals")
-	print("1: Sell Signals")
-	print("2: Show Certain Stock + Moving Average")
-	print("3: End")
+	os.system('clear')
+	print("*** MAIN MENU ***")
+	print("0: CPPI")
+	print("1: Movin Average")
+	print("2: End")
 	print("")
 	try:
 		menu = int(input("-> "))
 	except:
+		print("Wrong Input ...")
 		continue
-        
-		
-    #buy signals, displays all stocks if their price is 1% above or below the moving average value
-    #and if the price has risen since the last closing price
-    if menu == 0:
-        i = 0
-		while i < len(price2):
-			if price2[i][len(price2[i])-1] < ma[i][len(ma[i])-1] * 1.01 \
-			and price2[i][len(price2[i])-1] > ma[i][len(ma[i])-1] * 0.99 \
-			and price2[i][len(price2[i])-1]/price2[i][len(price2[i])-2] - 1 > 0:
-				plt.plot(price2[i])
-				plt.plot(ma[i])
-				plt.xlabel("Time")
-				plt.ylabel("Stock Price")
-				plt.legend(["Prices", "Moving Average"])
-				plt.title(stocks.Symbole.iloc[i])
-				plt.show()
-			i = i + 1
-	
-    
-    #sell signal
-    elif menu == 1:
-		i = 0
-		while i < len(price2):
-			if price2[i][len(price2[i])-1] < ma[i][len(ma[i])-1] * 1.01 \
-			and price2[i][len(price2[i])-1] > ma[i][len(ma[i])-1] * 0.99 \
-			and price2[i][len(price2[i])-1]/price2[i][len(price2[i])-2] - 1 < 0:
-				plt.plot(price2[i])
-				plt.plot(ma[i])
-				plt.xlabel("Time")
-				plt.ylabel("Stock Price")
-				plt.legend(["Prices", "Moving Average"])
-				plt.title(stocks.Symbole.iloc[i])
-				plt.show()
-			i = i + 1
-	
-    
-    #you can insert a ticker of your choice and the program will show you the according
-    #share performance plus the 90-day moving average
-    elif menu == 2:
-		found = False
+	if menu == 0:
+		cppi()
+	elif menu == 1:
+		movingaverage()
+	elif menu == 2:
 		os.system('clear')
-		while found == False:
-			print("Insert Ticker of Stock You Want To See")
-			print()
-			ticker = str(input("-> "))
-			for i in range(len(stocks)):
-				stockname = str(stocks.Symbole.iloc[i])
-				if ticker.lower() == stockname.lower():
-					idx = i
-					found = True
-			if found == True:
-				plt.plot(price2[idx])
-				plt.plot(ma[idx])
-				plt.ylabel("Stock Price")
-				plt.legend(["Prices", "Moving Average"])
-				plt.title(stocks.Symbole.iloc[idx])
-				plt.show()
-			else:
-				print("Stock not found ...")
-	
-    #ends the program
-    elif menu == 3:
 		break
 	else:
 		continue
