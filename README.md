@@ -1,4 +1,4 @@
-Currently includes:
+Currently contains:
   - Moving Average Scanner
   - CPPI
   
